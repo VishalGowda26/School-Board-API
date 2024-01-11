@@ -1,5 +1,7 @@
 package com.school.sba.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +40,10 @@ public class SchoolService {
 		School deleteschool = getSchoolById(schoolId);
 		repo.delete(deleteschool);
 		return "Successfully deleted";
+	}
+
+	public List<School> getAllSchools() {
+		return repo.findAll();
 	}
 
 }
