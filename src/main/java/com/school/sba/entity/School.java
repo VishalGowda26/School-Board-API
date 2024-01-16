@@ -16,6 +16,7 @@ public class School {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int schoolId;
+	private String schoolName;
 	private Long contactNo;
 	private String emailId;
 	private String address;
