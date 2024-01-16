@@ -13,37 +13,39 @@ public class SchoolService {
 	@Autowired
 	SchoolRepo repo;
 
-	public String addSchool(int schoolId, Long contactNo, String emailId, String address) {
+	public String addSchool(String schoolName, Long contactNo, String emailId, String address) {
 		School s = new School();
-		s.setAddress(address);
+		s.setSchoolName(schoolName);
 		s.setContactNo(contactNo);
 		s.setEmailId(emailId);
+		s.setAddress(address);
 		repo.save(s);
-		return "School Details Saved";
+		return "School " + schoolName + " Details Saved";
 
+	}
+
+	public List<School> getAllSchools() {
+		return repo.findAll();
 	}
 
 	public School getSchoolById(int schoolId) {
 		return repo.findById(schoolId).get();
 	}
 
-	public String updateSchool(int schoolId, Long contactNo, String address, String emailId) {
+	public String updateSchool(int schoolId, String schoolName, Long contactNo, String address, String emailId) {
 		School updateschool = getSchoolById(schoolId);
-		updateschool.setAddress(address);
+		updateschool.setSchoolName(schoolName);
 		updateschool.setContactNo(contactNo);
 		updateschool.setEmailId(emailId);
+		updateschool.setAddress(address);
 		repo.save(updateschool);
-		return "School Details Updated";
+		return "School " + schoolName + " Details Updated";
 	}
 
 	public String deleteSchool(int schoolId) {
 		School deleteschool = getSchoolById(schoolId);
 		repo.delete(deleteschool);
 		return "Successfully deleted";
-	}
-
-	public List<School> getAllSchools() {
-		return repo.findAll();
 	}
 
 }

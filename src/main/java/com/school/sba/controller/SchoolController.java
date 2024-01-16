@@ -14,8 +14,8 @@ public class SchoolController {
 	@Autowired
 	SchoolService service;
 
-	public void addSchool(int schoolId, Long contactNo, String emailId, String address) {
-		service.addSchool(schoolId, contactNo, address, emailId);
+	public void addSchool(String schoolName, Long contactNo, String emailId, String address) {
+		service.addSchool(schoolName, contactNo, address, emailId);
 
 	}
 
@@ -28,8 +28,8 @@ public class SchoolController {
 		
 	}
 
-	public void updateSchool(int schoolId, Long contactNo, String emailId, String address) {
-		service.updateSchool(schoolId, contactNo, address, emailId);
+	public void updateSchool(int schoolId, String schoolName, Long contactNo, String emailId, String address) {
+		service.updateSchool(schoolId,schoolName, contactNo, address, emailId);
 
 	}
 
