@@ -46,22 +46,18 @@ public class UserServiceImpl implements UserService {
 	public ResponseEntity<ResponseStructure<UserResponse>> registerUser(UserRequest userrequest) {
 		User user = mapToUser(userrequest);
 		user.setDeleted(false);
-		if (userrequest.getUserrole() == UserRole.ADMIN) {
-			admin++;
-		}
-		if (admin == 1 || userrequest.getUserrole() != UserRole.ADMIN) {
+		boolean existsByUserrole = repo.existsByUserrole(UserRole.ADMIN);
+		if (existsByUserrole==false || user.getUserrole()!=UserRole.ADMIN) {
 			try {
 				user = repo.save(user);
 			} catch (Exception e) {
-				throw new ConstraintViolationException(HttpStatus.ALREADY_REPORTED, "Duplicate entries not Allowed",
-						"Pls check the user details Entered details already exist");
+				throw new ConstraintViolationException("Pls check the user details Entered details already exist");
 			}
 			structure.setStatus(HttpStatus.CREATED.value());
 			structure.setMessage("Data Saved Successfully");
 			structure.setData(mapToUserResponse(user));
 		} else {
-			throw new ConstraintViolationException(HttpStatus.ALREADY_REPORTED, "Already Exist",
-					"There should only be one admin which is already Exist");
+			throw new ConstraintViolationException("There should only be one admin which is already Exist");
 		}
 		return new ResponseEntity<ResponseStructure<UserResponse>>(structure, HttpStatus.CREATED);
 	}
