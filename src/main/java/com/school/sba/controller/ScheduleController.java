@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.school.sba.entity.Schedule;
 import com.school.sba.requestdto.ScheduleRequest;
 import com.school.sba.responsedto.ScheduleResponse;
 import com.school.sba.service.ScheduleService;
@@ -32,10 +33,16 @@ public class ScheduleController {
 
 	}
 
+//	@PutMapping("/schedules/{scheduleId}")
+//	public ResponseEntity<ResponseStructure<ScheduleResponse>> updateSchedule(@PathVariable int scheduleId,
+//			@RequestBody ScheduleRequest scheduleRequest) {
+//		return service.updateSchedule(scheduleId, scheduleRequest);
+//
+//	}
 	@PutMapping("/schedules/{scheduleId}")
 	public ResponseEntity<ResponseStructure<ScheduleResponse>> updateSchedule(@PathVariable int scheduleId,
-			@RequestBody ScheduleRequest scheduleRequest) {
-		return service.updateSchedule(scheduleId, scheduleRequest);
-
+			@RequestBody Schedule schedule) {
+		return service.updateSchedule(scheduleId, schedule);
+		
 	}
 }
