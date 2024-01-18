@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.school.sba.entity.Schedule;
 import com.school.sba.entity.School;
+import com.school.sba.exception.ConstraintViolationException;
 import com.school.sba.exception.UserNotFoundByIdException;
 import com.school.sba.repository.ScheduleRepo;
 import com.school.sba.repository.SchoolRepo;
@@ -37,7 +38,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 				.classHoursLengthInMinutes((int) schedule.getClassHoursLengthInMinutes().toMinutes())
 				.breakTime(schedule.getBreakTime())
 				.breakLengthInMinutes((int) schedule.getBreakLengthInMinutes().toMinutes())
-				.lunchTime(schedule.getLunchTime())
+				.lunchTime(schedule.getLunchTime()).scheduleId(schedule.getScheduleId())
 				.lunchLengthInMinutes((int) schedule.getLunchLengthInMinutes().toMinutes()).build();
 	}
 
@@ -60,11 +61,17 @@ public class ScheduleServiceImpl implements ScheduleService {
 			ScheduleRequest schedulerequest) {
 		School school = schoolRepo.findById(schoolId)
 				.orElseThrow(() -> new UserNotFoundByIdException("Details not found"));
-		Schedule schedule = scheduleRepo.save(mapToSchedule(schedulerequest));
-		school.setSchedule(schedule);
-		structure.setStatus(HttpStatus.CREATED.value());
-		structure.setMessage("Schedule Successfully Added to School");
-		structure.setData(mapToScheduleResponse(schedule));
+		if (school.getSchedule() == null) {
+			Schedule schedule = scheduleRepo.save(mapToSchedule(schedulerequest));
+			school.setSchedule(schedule);
+			schoolRepo.save(school);
+			structure.setStatus(HttpStatus.CREATED.value());
+			structure.setMessage("Schedule Successfully Added to School");
+			structure.setData(mapToScheduleResponse(schedule));
+		} else {
+			throw new ConstraintViolationException(
+					"There should only be one Schedule to school which is already created");
+		}
 		return new ResponseEntity<ResponseStructure<ScheduleResponse>>(structure, HttpStatus.CREATED);
 
 	}
@@ -85,14 +92,14 @@ public class ScheduleServiceImpl implements ScheduleService {
 	/*------------------------------> Updating Schedule <--------------------------------------------*/
 
 	@Override
-	public ResponseEntity<ResponseStructure<ScheduleResponse>> updateSchedule(int scheduleId,
-			ScheduleRequest scheduleRequest) {
-		Schedule schedule1 = scheduleRepo.findById(scheduleId)
-				.orElseThrow(() -> new UserNotFoundByIdException("User Not Found"));
-		schedule1 = scheduleRepo.save(mapToSchedule(scheduleRequest));
+	public ResponseEntity<ResponseStructure<ScheduleResponse>> updateSchedule(int scheduleId, Schedule schedule) {
+		Schedule schedule2 = scheduleRepo.findById(scheduleId)
+				.orElseThrow(() -> new UserNotFoundByIdException("No User Found"));
+		schedule.setScheduleId(scheduleId);
+		scheduleRepo.save(schedule);
 		structure.setStatus(HttpStatus.OK.value());
 		structure.setMessage("Data Updated Successfully");
-		structure.setData(mapToScheduleResponse(schedule1));
+		structure.setData(mapToScheduleResponse(schedule2));
 		return new ResponseEntity<ResponseStructure<ScheduleResponse>>(structure, HttpStatus.OK);
 	}
 
