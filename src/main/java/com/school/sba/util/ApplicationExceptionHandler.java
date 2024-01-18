@@ -40,7 +40,7 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
 
 	@ExceptionHandler(ConstraintViolationException.class)
 	public ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException ex) {
-		return structure(HttpStatus.IM_USED, ex.getMessage(), ex.getRootCause());
+		return structure(HttpStatus.IM_USED, ex.getMessage(),"A field contains invalid data");
 	}
 
 //	@ExceptionHandler(UserNotFoundByIdException.class)
