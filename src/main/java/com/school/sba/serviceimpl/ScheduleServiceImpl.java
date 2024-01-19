@@ -92,9 +92,11 @@ public class ScheduleServiceImpl implements ScheduleService {
 	/*------------------------------> Updating Schedule <--------------------------------------------*/
 
 	@Override
-	public ResponseEntity<ResponseStructure<ScheduleResponse>> updateSchedule(int scheduleId, Schedule schedule) {
+	public ResponseEntity<ResponseStructure<ScheduleResponse>> updateSchedule(int scheduleId,
+			ScheduleRequest scheduleRequest) {
 		Schedule schedule2 = scheduleRepo.findById(scheduleId)
 				.orElseThrow(() -> new UserNotFoundByIdException("No User Found"));
+		Schedule schedule = mapToSchedule(scheduleRequest);
 		schedule.setScheduleId(scheduleId);
 		scheduleRepo.save(schedule);
 		structure.setStatus(HttpStatus.OK.value());
