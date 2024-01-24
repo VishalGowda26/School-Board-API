@@ -3,6 +3,7 @@ package com.school.sba.serviceimpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.school.sba.entity.User;
@@ -15,9 +16,12 @@ import com.school.sba.responsedto.UserResponse;
 import com.school.sba.service.UserService;
 import com.school.sba.util.ResponseStructure;
 
+import jakarta.validation.Valid;
+
 @Service
 public class UserServiceImpl implements UserService {
-
+	@Autowired
+	PasswordEncoder passwordEncoder;
 	@Autowired
 	UserRepo repo;
 	@Autowired
@@ -26,10 +30,10 @@ public class UserServiceImpl implements UserService {
 	/*------------------------------> User Request <--------------------------------------------*/
 
 	private User mapToUser(UserRequest userRequest) {
-		return User.builder().username(userRequest.getUsername()).password(userRequest.getPassword())
-				.firstName(userRequest.getFirstName()).lastName(userRequest.getLastName())
-				.contactNo(userRequest.getContactNo()).email(userRequest.getEmail()).userrole(userRequest.getUserrole())
-				.build();
+		return User.builder().username(userRequest.getUsername())
+				.password(passwordEncoder.encode(userRequest.getPassword())).firstName(userRequest.getFirstName())
+				.lastName(userRequest.getLastName()).contactNo(userRequest.getContactNo()).email(userRequest.getEmail())
+				.userrole(userRequest.getUserrole()).build();
 	}
 
 	/*------------------------------> User Request <--------------------------------------------*/
@@ -39,15 +43,14 @@ public class UserServiceImpl implements UserService {
 				.userrole(user.getUserrole()).build();
 	}
 
-	/*------------------------------> TO Register User <--------------------------------------------*/
-	int admin = 0;
+	/*------------------------------> TO Register Admin <--------------------------------------------*/
 
 	@Override
-	public ResponseEntity<ResponseStructure<UserResponse>> registerUser(UserRequest userrequest) {
+	public ResponseEntity<ResponseStructure<UserResponse>> registerAdmin(UserRequest userrequest) {
 		User user = mapToUser(userrequest);
 		user.setDeleted(false);
 		boolean existsByUserrole = repo.existsByUserrole(UserRole.ADMIN);
-		if (existsByUserrole==false || user.getUserrole()!=UserRole.ADMIN) {
+		if (existsByUserrole == false || user.getUserrole() != UserRole.ADMIN) {
 			try {
 				user = repo.save(user);
 			} catch (Exception e) {
@@ -56,6 +59,28 @@ public class UserServiceImpl implements UserService {
 			structure.setStatus(HttpStatus.CREATED.value());
 			structure.setMessage("Data Saved Successfully");
 			structure.setData(mapToUserResponse(user));
+		} else {
+			throw new ConstraintViolationException("There should only be one admin which is already Exist");
+		}
+		return new ResponseEntity<ResponseStructure<UserResponse>>(structure, HttpStatus.CREATED);
+	}
+
+	/*------------------------------> TO Register Users <--------------------------------------------*/
+
+	@Override
+	public ResponseEntity<ResponseStructure<UserResponse>> registerUser(@Valid UserRequest userrequest, int userId) {
+		User user2 = mapToUser(userrequest);
+		user2.setDeleted(false);
+		boolean existsByUserrole = repo.existsByUserrole(UserRole.ADMIN);
+		if (existsByUserrole == false || user2.getUserrole().equals(UserRole.ADMIN)) {
+			if (user2.getUserrole().equals(UserRole.ADMIN)) {
+				repo.save(user2);
+				structure.setData(mapToUserResponse(user2));
+				structure.setMessage("User Successfully saved");
+				structure.setStatus(HttpStatus.CREATED.value());
+			} else {
+				throw new ConstraintViolationException("Only Admin can create the users");
+			}
 		} else {
 			throw new ConstraintViolationException("There should only be one admin which is already Exist");
 		}
@@ -90,4 +115,5 @@ public class UserServiceImpl implements UserService {
 		}
 		return new ResponseEntity<ResponseStructure<UserResponse>>(structure, HttpStatus.FOUND);
 	}
+
 }

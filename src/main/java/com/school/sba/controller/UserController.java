@@ -22,18 +22,24 @@ public class UserController {
 	UserService service;
 
 	@PostMapping("/users/register")
-	public ResponseEntity<ResponseStructure<UserResponse>> registerUser(@RequestBody @Valid UserRequest userrequest) {
-		return service.registerUser(userrequest);
+	public ResponseEntity<ResponseStructure<UserResponse>> registerAdmin(@RequestBody @Valid UserRequest userrequest) {
+		return service.registerAdmin(userrequest);
+	}
+
+	@PostMapping("/users/{userId}/register")
+	public ResponseEntity<ResponseStructure<UserResponse>> registerUser(@RequestBody @Valid UserRequest userrequest,
+			@PathVariable int userId) {
+		return service.registerUser(userrequest, userId);
 	}
 
 	@GetMapping("/users/{userId}")
 	public ResponseEntity<ResponseStructure<UserResponse>> getUser(@PathVariable int userId) {
 		return service.getUser(userId);
 	}
-	
+
 	@DeleteMapping("/users/{userId}")
-	public ResponseEntity<ResponseStructure<UserResponse>> deleteUser(@PathVariable int userId){
+	public ResponseEntity<ResponseStructure<UserResponse>> deleteUser(@PathVariable int userId) {
 		return service.deleteUser(userId);
-		
+
 	}
 }

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.school.sba.entity.Subject;
+import com.school.sba.entity.User;
 import com.school.sba.requestdto.SubjectRequest;
 import com.school.sba.responsedto.AcademicProgramResponse;
 import com.school.sba.serviceimpl.SubjectServiceImpl;
@@ -38,8 +39,21 @@ public class SubjectController {
 	}
 
 	@GetMapping("/academic-programs/{programId}/subjects")
-	public ResponseEntity<ResponseStructure<List<Subject>>>  getSubjects(@PathVariable int programId) {
+	public ResponseEntity<ResponseStructure<List<Subject>>> getSubjects(@PathVariable int programId) {
 		return subjectService.getSubjects(programId);
+
+	}
+
+	@GetMapping("/subjects")
+	public ResponseEntity<ResponseStructure<List<Subject>>> fetchSubjects() {
+		return subjectService.fetchSubjects();
+
+	}
+
+	@PutMapping("/subjects/{subjectId}/users/{userId}")
+	public ResponseEntity<ResponseStructure<User>> assignSubjects(@PathVariable int subjectId,
+			@PathVariable int userId) {
+		return subjectService.assignSubjects(subjectId, userId);
 
 	}
 }

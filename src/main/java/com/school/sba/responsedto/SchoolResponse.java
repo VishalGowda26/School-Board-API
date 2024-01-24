@@ -1,5 +1,7 @@
 package com.school.sba.responsedto;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,4 +19,6 @@ public class SchoolResponse {
 	private Long contactNo;
 	private String emailId;
 	private String address;
+
+	private List<String> subjectNames;
 }
