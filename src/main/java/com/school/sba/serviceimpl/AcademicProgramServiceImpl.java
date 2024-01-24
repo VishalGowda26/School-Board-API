@@ -10,9 +10,13 @@ import org.springframework.stereotype.Service;
 
 import com.school.sba.entity.AcademicProgram;
 import com.school.sba.entity.School;
+import com.school.sba.entity.User;
+import com.school.sba.enums.UserRole;
+import com.school.sba.exception.ConstraintViolationException;
 import com.school.sba.exception.UserNotFoundByIdException;
 import com.school.sba.repository.AcademicProgramRepo;
 import com.school.sba.repository.SchoolRepo;
+import com.school.sba.repository.UserRepo;
 import com.school.sba.requestdto.AcademicProgramRequest;
 import com.school.sba.responsedto.AcademicProgramResponse;
 import com.school.sba.service.AcademicProgramService;
@@ -23,6 +27,9 @@ public class AcademicProgramServiceImpl implements AcademicProgramService {
 
 	@Autowired
 	AcademicProgramRepo programRepo;
+
+	@Autowired
+	UserRepo userRepo;
 
 	@Autowired
 	SchoolRepo schoolRepo;
@@ -79,6 +86,23 @@ public class AcademicProgramServiceImpl implements AcademicProgramService {
 		return AcademicProgramResponse.builder().programId(academicProgram.getProgramId())
 				.programType(academicProgram.getProgramType()).programNameString(academicProgram.getProgramName())
 				.beginsAt(academicProgram.getBeginsAt()).endsAt(academicProgram.getEndsAt()).build();
+	}
+
+	@Override
+	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> updateProgram(int programId, int userId) {
+		User user = userRepo.findById(userId).orElseThrow(() -> new UserNotFoundByIdException("User Not Found"));
+		AcademicProgram academicProgram = programRepo.findById(programId)
+				.orElseThrow(() -> new UserNotFoundByIdException("Program Not Found"));
+		if (user.getUserrole().equals(UserRole.ADMIN)) {
+			throw new ConstraintViolationException("Admin can't create program");
+		} else {
+			academicProgram.getUserList().add(user);
+			programRepo.save(academicProgram);
+			structure.setData(mapToAcademicResponseProgram(academicProgram));
+			structure.setMessage("Data Successfully added");
+			structure.setStatus(HttpStatus.CREATED.value());
+		}
+		return new ResponseEntity<ResponseStructure<AcademicProgramResponse>>(structure, HttpStatus.CREATED);
 	}
 
 }
