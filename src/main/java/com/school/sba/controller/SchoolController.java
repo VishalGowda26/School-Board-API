@@ -1,40 +1,27 @@
 package com.school.sba.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.school.sba.entity.School;
+import com.school.sba.requestdto.SchoolRequest;
+import com.school.sba.responsedto.SchoolResponse;
 import com.school.sba.service.SchoolService;
+import com.school.sba.util.ResponseStructure;
 
-@Controller
+@RestController
 public class SchoolController {
 
 	@Autowired
-	SchoolService service;
+	private SchoolService service;
 
-	public void addSchool(String schoolName, Long contactNo, String emailId, String address) {
-		service.addSchool(schoolName, contactNo, address, emailId);
-
-	}
-
-	public void getSchoolById(int schoolId) {
-		service.getSchoolById(schoolId);
-	}
-
-	public List<School> getAllSchools() {
-		return service.getAllSchools();
-		
-	}
-
-	public void updateSchool(int schoolId, String schoolName, Long contactNo, String emailId, String address) {
-		service.updateSchool(schoolId,schoolName, contactNo, address, emailId);
-
-	}
-
-	public void deleteSchool(int schoolId) {
-		service.deleteSchool(schoolId);
+	@PreAuthorize("hasAuthority('ADMIN')")
+	@PostMapping("/schools")
+	public ResponseEntity<ResponseStructure<SchoolResponse>> createSchool(@RequestBody SchoolRequest schoolRequest) {
+		return service.createSchool(schoolRequest);
 	}
 
 }
