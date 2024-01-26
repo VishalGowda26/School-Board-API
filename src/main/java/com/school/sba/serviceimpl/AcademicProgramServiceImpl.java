@@ -94,7 +94,7 @@ public class AcademicProgramServiceImpl implements AcademicProgramService {
 		AcademicProgram academicProgram = programRepo.findById(programId)
 				.orElseThrow(() -> new UserNotFoundByIdException("Program Not Found"));
 		if (user.getUserrole().equals(UserRole.ADMIN)) {
-			throw new ConstraintViolationException("Admin can't create program");
+			throw new ConstraintViolationException("Program cannot be added to Admin");
 		} else {
 			academicProgram.getUserList().add(user);
 			programRepo.save(academicProgram);
@@ -103,6 +103,29 @@ public class AcademicProgramServiceImpl implements AcademicProgramService {
 			structure.setStatus(HttpStatus.CREATED.value());
 		}
 		return new ResponseEntity<ResponseStructure<AcademicProgramResponse>>(structure, HttpStatus.CREATED);
+	}
+
+	@Override
+	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> addUserToAcademicProgram(int userId,
+			int programId) {
+		User user = userRepo.findById(userId)
+				.orElseThrow(() -> new UserNotFoundByIdException("User with given id is not found"));
+		AcademicProgram academicProgram = programRepo.findById(programId)
+				.orElseThrow(() -> new UserNotFoundByIdException("Program not Found with given Id"));
+		if (user.getUserrole() != (UserRole.ADMIN)) {
+			if (academicProgram.getSubjects().contains(user.getSubject())) {
+				academicProgram.getUserList().add(user);
+				programRepo.save(academicProgram);
+				structure.setData(mapToAcademicResponseProgram(academicProgram));
+				structure.setMessage("Program Successfully added");
+				structure.setStatus(HttpStatus.OK.value());
+			} else {
+				throw new ConstraintViolationException("No Such subject Associated to Program");
+			}
+		} else {
+			throw new ConstraintViolationException("Program cannot be added to Admin");
+		}
+		return new ResponseEntity<ResponseStructure<AcademicProgramResponse>>(structure, HttpStatus.OK);
 	}
 
 }

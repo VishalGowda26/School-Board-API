@@ -31,10 +31,17 @@ public class AcademicProgramController {
 		return programService.fetchAllAcademicProgram(schoolId);
 	}
 
+//	@PutMapping(path = "/academic-programs/{programId}/users/{userId}")
+//	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> updateProgram(@PathVariable int programId,
+//			@PathVariable int userId) {
+//		return programService.updateProgram(userId, programId);
+//
+//	}
+
 	@PutMapping(path = "/academic-programs/{programId}/users/{userId}")
-	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> updateProgram(@PathVariable int programId,
-			@PathVariable int userId) {
-		return programService.updateProgram(userId, programId);
+	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> addUserToAcademicProgram(
+			@PathVariable int programId, @PathVariable int userId) {
+		return programService.addUserToAcademicProgram(userId, programId);
 
 	}
 }

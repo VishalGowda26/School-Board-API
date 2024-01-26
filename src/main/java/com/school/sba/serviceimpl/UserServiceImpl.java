@@ -3,20 +3,21 @@ package com.school.sba.serviceimpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.school.sba.entity.School;
 import com.school.sba.entity.User;
 import com.school.sba.enums.UserRole;
 import com.school.sba.exception.ConstraintViolationException;
+import com.school.sba.exception.DuplicateEntryException;
 import com.school.sba.exception.UserNotFoundByIdException;
 import com.school.sba.repository.UserRepo;
 import com.school.sba.requestdto.UserRequest;
 import com.school.sba.responsedto.UserResponse;
 import com.school.sba.service.UserService;
 import com.school.sba.util.ResponseStructure;
-
-import jakarta.validation.Valid;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -50,39 +51,34 @@ public class UserServiceImpl implements UserService {
 		User user = mapToUser(userrequest);
 		user.setDeleted(false);
 		boolean existsByUserrole = repo.existsByUserrole(UserRole.ADMIN);
-		if (existsByUserrole == false || user.getUserrole() != UserRole.ADMIN) {
-			try {
-				user = repo.save(user);
-			} catch (Exception e) {
-				throw new ConstraintViolationException("Pls check the user details Entered details already exist");
-			}
+		if (existsByUserrole == false && user.getUserrole().equals(UserRole.ADMIN)) {
+			user = repo.save(user);
 			structure.setStatus(HttpStatus.CREATED.value());
 			structure.setMessage("Data Saved Successfully");
 			structure.setData(mapToUserResponse(user));
 		} else {
-			throw new ConstraintViolationException("There should only be one admin which is already Exist");
+			throw new DuplicateEntryException("Admin Already Exists only one admin is allowed");
 		}
 		return new ResponseEntity<ResponseStructure<UserResponse>>(structure, HttpStatus.CREATED);
 	}
 
-	/*------------------------------> TO Register Users <--------------------------------------------*/
+	/*------------------------------> TO addOther Users <--------------------------------------------*/
 
 	@Override
-	public ResponseEntity<ResponseStructure<UserResponse>> registerUser(@Valid UserRequest userrequest, int userId) {
+	public ResponseEntity<ResponseStructure<UserResponse>> addOtherUser(UserRequest userrequest) {
 		User user2 = mapToUser(userrequest);
 		user2.setDeleted(false);
-		boolean existsByUserrole = repo.existsByUserrole(UserRole.ADMIN);
-		if (existsByUserrole == false || user2.getUserrole().equals(UserRole.ADMIN)) {
-			if (user2.getUserrole().equals(UserRole.ADMIN)) {
-				repo.save(user2);
-				structure.setData(mapToUserResponse(user2));
-				structure.setMessage("User Successfully saved");
-				structure.setStatus(HttpStatus.CREATED.value());
-			} else {
-				throw new ConstraintViolationException("Only Admin can create the users");
-			}
+		User user = repo.findByUserrole(UserRole.ADMIN)
+				.orElseThrow(() -> new UsernameNotFoundException("User with given details not found"));
+		if (user2.getUserrole() != (UserRole.ADMIN)) {
+			School school = user.getSchool();
+			user2.setSchool(school);
+			repo.save(user2);
+			structure.setData(mapToUserResponse(user2));
+			structure.setMessage("User Successfully saved");
+			structure.setStatus(HttpStatus.CREATED.value());
 		} else {
-			throw new ConstraintViolationException("There should only be one admin which is already Exist");
+			throw new ConstraintViolationException("Only Admin can create the users");
 		}
 		return new ResponseEntity<ResponseStructure<UserResponse>>(structure, HttpStatus.CREATED);
 	}

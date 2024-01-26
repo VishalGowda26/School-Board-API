@@ -11,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -38,6 +39,10 @@ public class AcademicProgram {
 
 	@ManyToMany
 	private List<Subject> subjects;
+
 	@ManyToMany
 	private List<User> userList;
+
+	@OneToMany(mappedBy = "academicProgram")
+	private List<ClassHour> classHourList;
 }

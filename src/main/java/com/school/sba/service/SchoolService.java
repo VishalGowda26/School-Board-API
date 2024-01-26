@@ -7,5 +7,5 @@ import com.school.sba.responsedto.SchoolResponse;
 import com.school.sba.util.ResponseStructure;
 
 public interface SchoolService {
-	public ResponseEntity<ResponseStructure<SchoolResponse>> createSchool(int userId, SchoolRequest schoolRequest);
+	public ResponseEntity<ResponseStructure<SchoolResponse>> createSchool(SchoolRequest schoolRequest);
 }

@@ -16,4 +16,7 @@ public interface AcademicProgramService {
 	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> updateProgram(@PathVariable int programId,
 			@PathVariable int userId);
 
+	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> addUserToAcademicProgram(
+			@PathVariable int programId, @PathVariable int userId);
+
 }
