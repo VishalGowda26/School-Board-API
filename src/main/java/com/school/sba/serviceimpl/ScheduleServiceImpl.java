@@ -45,7 +45,8 @@ public class ScheduleServiceImpl implements ScheduleService {
 	/*------------------------------> Schedule Request <--------------------------------------------*/
 
 	public Schedule mapToSchedule(ScheduleRequest scheduleRequest) {
-		return Schedule.builder().opeansAt(scheduleRequest.getOpeansAt()).closesAt(scheduleRequest.getClosesAt())
+		return Schedule.builder().opeansAt(scheduleRequest.getOpeansAt())
+				.closesAt(scheduleRequest.getClosesAt())
 				.classHoursLengthInMinutes(Duration.ofMinutes(scheduleRequest.getClassHoursLengthInMinutes()))
 				.classHoursPerDay(scheduleRequest.getClassHoursPerDay()).breakTime(scheduleRequest.getBreakTime())
 				.breakLengthInMinutes(Duration.ofMinutes(scheduleRequest.getBreakLengthInMinutes()))
@@ -72,6 +73,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 			throw new ConstraintViolationException(
 					"There should only be one Schedule to school which is already created");
 		}
+		
 		return new ResponseEntity<ResponseStructure<ScheduleResponse>>(structure, HttpStatus.CREATED);
 
 	}
