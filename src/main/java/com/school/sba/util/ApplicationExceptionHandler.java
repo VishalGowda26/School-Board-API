@@ -19,6 +19,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import com.school.sba.exception.ConstraintViolationException;
 import com.school.sba.exception.DuplicateEntryException;
 import com.school.sba.exception.ScheduleNotFoundBySchoolIdException;
+import com.school.sba.exception.UnauthorizedException;
 import com.school.sba.exception.UserNotFoundByIdException;
 
 @RestControllerAdvice
@@ -63,5 +64,10 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
 	@ExceptionHandler(ScheduleNotFoundBySchoolIdException.class)
 	public ResponseEntity<Object> handleScheduleNotFoundBySchoolId(ScheduleNotFoundBySchoolIdException ex) {
 		return structure(HttpStatus.NOT_FOUND, ex.getMessage(), "No schedule is associated with the given school");
+	}
+
+	@ExceptionHandler(UnauthorizedException.class)
+	public ResponseEntity<Object> handleUnauthorizedException(UnauthorizedException exception) {
+		return structure(exception.getStatus(), exception.getMessage(), exception.getRootCause());
 	}
 }

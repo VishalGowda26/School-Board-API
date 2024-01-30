@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.school.sba.enums.UserRole;
 import com.school.sba.requestdto.AcademicProgramRequest;
 import com.school.sba.responsedto.AcademicProgramResponse;
+import com.school.sba.responsedto.UserResponse;
 import com.school.sba.service.AcademicProgramService;
 import com.school.sba.util.ResponseStructure;
 
@@ -42,6 +44,13 @@ public class AcademicProgramController {
 	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> addUserToAcademicProgram(
 			@PathVariable int programId, @PathVariable int userId) {
 		return programService.addUserToAcademicProgram(userId, programId);
+
+	}
+
+	@GetMapping(path = "/academic-programs/{programId}/user-role/{userRole}/users")
+	public ResponseEntity<ResponseStructure<UserResponse>> fetchUsersList(@PathVariable int programId,
+			@PathVariable UserRole userRole) {
+		return programService.fetchUsersList(programId,userRole);
 
 	}
 }

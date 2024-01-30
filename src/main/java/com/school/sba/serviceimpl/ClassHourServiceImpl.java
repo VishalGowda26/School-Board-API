@@ -17,8 +17,8 @@ import com.school.sba.entity.Subject;
 import com.school.sba.entity.User;
 import com.school.sba.enums.ClassStatus;
 import com.school.sba.enums.UserRole;
+import com.school.sba.exception.ConstraintViolationException;
 import com.school.sba.exception.ScheduleNotFoundBySchoolIdException;
-import com.school.sba.exception.UserNotFoundByIdException;
 import com.school.sba.repository.AcademicProgramRepo;
 import com.school.sba.repository.ClassHourRepo;
 import com.school.sba.repository.SubjectRepo;
@@ -48,7 +48,7 @@ public class ClassHourServiceImpl implements ClassHourService {
 	SubjectRepo subjectRepo;
 
 	@Autowired
-	ResponseStructure<String> lstructure;
+	ResponseStructure<List<ClassHourRequest>> lstructure;
 
 	@Override
 	public ResponseEntity<ResponseStructure<ClassHour>> createClassHour(int programId) {
@@ -120,40 +120,38 @@ public class ClassHourServiceImpl implements ClassHourService {
 	}
 
 	@Override
-	public ResponseEntity<ResponseStructure<String>> updateClassHour(
+	public ResponseEntity<ResponseStructure<List<ClassHourRequest>>> updateClassHour(
 			List<ClassHourRequest> updateRequests) {
-//		updateRequests.forEach((req) -> {
-//			int userId = req.getUserId();
-//			log.info("finding user by Id");
-//			User user = userRepo.findById(userId).orElseThrow(
-//					() -> new UserNotFoundByIdException("User with given ID is not registered in the database"));
-//			int roomNo = req.getRoomNo();
-//			int hourId = req.getClassHourId();
-//			log.info("finding class hour by Id");
-//			ClassHour classHour = classHourRepo.findById(hourId).orElseThrow(
-//					() -> new UserNotFoundByIdException("ClassHour with given ID is not registered in the database"));
-//			int subjectId = req.getSubjectId();
-//			log.info("Finding subject by id");
-//			Subject subject = subjectRepo.findById(subjectId).orElseThrow(
-//					() -> new UserNotFoundByIdException("Subject with given ID is not registered in the database"));
-//			if (!(classHourRepo.existsByRoomNo(roomNo))) {
-//				log.info("there is no class rooms found associated with class hour");
-//				if (user.getUserrole().equals(UserRole.TEACHER)) {
-//					log.info("userRole is teacher");
-//					classHour.setRoomNo(roomNo);
-//					classHour.setSubject(subject);
-//					classHour.setUser(user);
-//					classHourRepo.save(classHour);
-//				}else {
-//					throw new UsernameNotFoundException("Invalid Teacher Id,User not found with given Id");
-//				}
-//			} else {
-//				throw new UsernameNotFoundException("Invalid Program Id");
-//			}
-//		});
-//		lstructure.setMessage("Class Hours are successfully updated");
-		lstructure.setData("working");
-		lstructure.setStatus(HttpStatus.OK.value());
-		return new ResponseEntity<ResponseStructure<String>>(lstructure, HttpStatus.OK);
+		updateRequests.forEach((req) -> {
+			int userId = req.getUserId();
+			User user = userRepo.findById(userId).orElseThrow(
+					() -> new UsernameNotFoundException("User with given ID is not registered in the database"));
+			int roomNo = req.getRoomNo();
+			int hourId = req.getClassHourId();
+			ClassHour classHour = classHourRepo.findById(hourId).orElseThrow(
+					() -> new UsernameNotFoundException("ClassHour with given ID is not registered in the database"));
+			int subjectId = req.getSubjectId();
+			Subject subject = subjectRepo.findById(subjectId).orElseThrow(
+					() -> new UsernameNotFoundException("Subject with given ID is not registered in the database"));
+			if (!classHourRepo.existsByRoomNoAndBeginsAtBetween(roomNo, classHour.getBeginsAt(),
+					classHour.getEndsAt())) {
+				if (user.getUserrole().equals(UserRole.TEACHER)) {
+					classHour.setRoomNo(roomNo);
+					classHour.setSubject(subject);
+					classHour.setUser(user);
+					classHour.setClassStatus(ClassStatus.UPCOMMING);
+					classHourRepo.save(classHour);
+					lstructure.setMessage("ClassHour Updated successfully for the given User");
+					lstructure.setData(updateRequests);
+					lstructure.setStatus(HttpStatus.CREATED.value());
+
+				} else {
+					throw new ConstraintViolationException("Invalid User Id");
+				}
+			} else {
+				throw new UsernameNotFoundException("Class Hour already contains Room No");
+			}
+		});
+		return new ResponseEntity<ResponseStructure<List<ClassHourRequest>>>(lstructure, HttpStatus.CREATED);
 	}
 }

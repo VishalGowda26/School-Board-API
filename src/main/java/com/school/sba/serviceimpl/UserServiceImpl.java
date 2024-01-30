@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
 
 	/*------------------------------> User Request <--------------------------------------------*/
 
-	private User mapToUser(UserRequest userRequest) {
+	public User mapToUser(UserRequest userRequest) {
 		return User.builder().username(userRequest.getUsername())
 				.password(passwordEncoder.encode(userRequest.getPassword())).firstName(userRequest.getFirstName())
 				.lastName(userRequest.getLastName()).contactNo(userRequest.getContactNo()).email(userRequest.getEmail())
@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	/*------------------------------> User Request <--------------------------------------------*/
-	private UserResponse mapToUserResponse(User user) {
+	public UserResponse mapToUserResponse(User user) {
 		return UserResponse.builder().userId(user.getUserId()).username(user.getUsername())
 				.firstName(user.getFirstName()).lastName(user.getLastName()).email(user.getEmail())
 				.userrole(user.getUserrole()).build();
