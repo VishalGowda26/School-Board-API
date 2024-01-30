@@ -17,6 +17,9 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.school.sba.exception.ConstraintViolationException;
+import com.school.sba.exception.DuplicateEntryException;
+import com.school.sba.exception.ScheduleNotFoundBySchoolIdException;
+import com.school.sba.exception.UnauthorizedException;
 import com.school.sba.exception.UserNotFoundByIdException;
 
 @RestControllerAdvice
@@ -40,7 +43,7 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
 
 	@ExceptionHandler(ConstraintViolationException.class)
 	public ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException ex) {
-		return structure(HttpStatus.IM_USED, ex.getMessage(),"A field contains invalid data");
+		return structure(HttpStatus.IM_USED, ex.getMessage(), "A field contains invalid data");
 	}
 
 //	@ExceptionHandler(UserNotFoundByIdException.class)
@@ -51,5 +54,20 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
 	@ExceptionHandler(UserNotFoundByIdException.class)
 	public ResponseEntity<Object> handleUserNotFoundException(UserNotFoundByIdException ex) {
 		return structure(HttpStatus.NOT_FOUND, ex.getMessage(), "User with given id doesn't exist");
+	}
+
+	@ExceptionHandler(DuplicateEntryException.class)
+	public ResponseEntity<Object> handleDuplicateEntryException(DuplicateEntryException ex) {
+		return structure(HttpStatus.NOT_ACCEPTABLE, ex.getMessage(), "Duplicate Entry Not Allowed");
+	}
+
+	@ExceptionHandler(ScheduleNotFoundBySchoolIdException.class)
+	public ResponseEntity<Object> handleScheduleNotFoundBySchoolId(ScheduleNotFoundBySchoolIdException ex) {
+		return structure(HttpStatus.NOT_FOUND, ex.getMessage(), "No schedule is associated with the given school");
+	}
+
+	@ExceptionHandler(UnauthorizedException.class)
+	public ResponseEntity<Object> handleUnauthorizedException(UnauthorizedException exception) {
+		return structure(exception.getStatus(), exception.getMessage(), exception.getRootCause());
 	}
 }

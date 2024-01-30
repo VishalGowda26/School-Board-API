@@ -5,10 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @SuppressWarnings("serial")
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-public class ConstraintViolationException extends RuntimeException {
+public class DuplicateEntryException extends RuntimeException {
 	private String message;
-
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.school.sba.entity.AcademicProgram;
@@ -13,12 +14,14 @@ import com.school.sba.entity.School;
 import com.school.sba.entity.User;
 import com.school.sba.enums.UserRole;
 import com.school.sba.exception.ConstraintViolationException;
+import com.school.sba.exception.UnauthorizedException;
 import com.school.sba.exception.UserNotFoundByIdException;
 import com.school.sba.repository.AcademicProgramRepo;
 import com.school.sba.repository.SchoolRepo;
 import com.school.sba.repository.UserRepo;
 import com.school.sba.requestdto.AcademicProgramRequest;
 import com.school.sba.responsedto.AcademicProgramResponse;
+import com.school.sba.responsedto.UserResponse;
 import com.school.sba.service.AcademicProgramService;
 import com.school.sba.util.ResponseStructure;
 
@@ -35,10 +38,16 @@ public class AcademicProgramServiceImpl implements AcademicProgramService {
 	SchoolRepo schoolRepo;
 
 	@Autowired
+	UserServiceImpl userService;
+
+	@Autowired
 	ResponseStructure<AcademicProgramResponse> structure;
 
 	@Autowired
 	ResponseStructure<List<AcademicProgramResponse>> responseStructure;
+
+	@Autowired
+	ResponseStructure<UserResponse> userStructure;
 
 	/*------------------------------> SaveProgram associated to school <--------------------------------------*/
 
@@ -49,6 +58,8 @@ public class AcademicProgramServiceImpl implements AcademicProgramService {
 		School school = schoolRepo.findById(schoolId)
 				.orElseThrow(() -> new UserNotFoundByIdException("User Not Found"));
 		school.getAcademicPrograms().add(program);
+		program.setSchool(school);
+		programRepo.save(program);
 		schoolRepo.save(school);
 		structure.setData(mapToAcademicResponseProgram(program));
 		structure.setMessage("Academic Program saved to the database");
@@ -88,13 +99,15 @@ public class AcademicProgramServiceImpl implements AcademicProgramService {
 				.beginsAt(academicProgram.getBeginsAt()).endsAt(academicProgram.getEndsAt()).build();
 	}
 
+	/*------------------------------> Update AcademicProgram <--------------------------------------*/
+
 	@Override
 	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> updateProgram(int programId, int userId) {
 		User user = userRepo.findById(userId).orElseThrow(() -> new UserNotFoundByIdException("User Not Found"));
 		AcademicProgram academicProgram = programRepo.findById(programId)
 				.orElseThrow(() -> new UserNotFoundByIdException("Program Not Found"));
 		if (user.getUserrole().equals(UserRole.ADMIN)) {
-			throw new ConstraintViolationException("Admin can't create program");
+			throw new ConstraintViolationException("Program cannot be added to Admin");
 		} else {
 			academicProgram.getUserList().add(user);
 			programRepo.save(academicProgram);
@@ -103,6 +116,56 @@ public class AcademicProgramServiceImpl implements AcademicProgramService {
 			structure.setStatus(HttpStatus.CREATED.value());
 		}
 		return new ResponseEntity<ResponseStructure<AcademicProgramResponse>>(structure, HttpStatus.CREATED);
+	}
+
+	/*---------------------> Add User To Academic Program associated to school <----------------------------*/
+
+	@Override
+	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> addUserToAcademicProgram(int userId,
+			int programId) {
+		AcademicProgram academicProgram = programRepo.findById(programId)
+				.orElseThrow(() -> new UsernameNotFoundException(
+						"Academic Program with given ID is not registered in the database"));
+		return userRepo.findById(userId).map(u -> {
+			if (u.getUserrole().equals(UserRole.ADMIN)) {
+				throw new UnauthorizedException(
+						"User with given ID is an admin so the program cannot be registered to it",
+						HttpStatus.BAD_REQUEST, "No such mapping possible");
+			} else if (!(academicProgram.getSubjects().contains(u.getSubject()))) {
+				throw new UnauthorizedException(
+						"User with given ID contains a subject which is not present in the respective academic program",
+						HttpStatus.BAD_REQUEST, "No such mapping possible");
+			} else {
+				academicProgram.getUserList().add(u);
+				programRepo.save(academicProgram);
+				structure.setData(mapToAcademicResponseProgram(academicProgram));
+				structure.setStatus(HttpStatus.ACCEPTED.value());
+				structure.setMessage("Added user to academic program");
+				return new ResponseEntity<ResponseStructure<AcademicProgramResponse>>(structure, HttpStatus.ACCEPTED);
+			}
+		}).orElseThrow(() -> new UsernameNotFoundException("User with given ID is not registered in the database"));
+
+	}
+
+	/*---------------------> Fetch list of Teachers in Academic Program <----------------------------*/
+
+	@Override
+	public ResponseEntity<ResponseStructure<UserResponse>> fetchUsersList(int programId, UserRole userRole) {
+		User user = programRepo.findByProgramIdAndUserRole(userRole, programId).orElseThrow(
+				() -> new UserNotFoundByIdException("Program With given id/User With given Role Not Found"));
+		if (!(user.getUserrole().equals(UserRole.ADMIN))) {
+			if (user.getUserrole().equals(userRole) && user != null) {
+				programRepo.findAll();
+				userStructure.setData(userService.mapToUserResponse(user));
+				userStructure.setMessage("Teachers List Successfully Fetched");
+				userStructure.setStatus(HttpStatus.FOUND.value());
+			} else {
+				throw new UsernameNotFoundException("User Not Found with Given Id");
+			}
+		} else {
+			throw new UsernameNotFoundException("Admin details are confidential");
+		}
+		return new ResponseEntity<ResponseStructure<UserResponse>>(userStructure, HttpStatus.FOUND);
 	}
 
 }

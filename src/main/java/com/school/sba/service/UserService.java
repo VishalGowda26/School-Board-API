@@ -13,8 +13,7 @@ import jakarta.validation.Valid;
 public interface UserService {
 	public ResponseEntity<ResponseStructure<UserResponse>> registerAdmin(@RequestBody UserRequest userrequest);
 
-	public ResponseEntity<ResponseStructure<UserResponse>> registerUser(@RequestBody @Valid UserRequest userrequest,
-			@PathVariable int userId);
+	public ResponseEntity<ResponseStructure<UserResponse>> addOtherUser(@RequestBody @Valid UserRequest userrequest);
 
 	public ResponseEntity<ResponseStructure<UserResponse>> getUser(@PathVariable int userId);
 

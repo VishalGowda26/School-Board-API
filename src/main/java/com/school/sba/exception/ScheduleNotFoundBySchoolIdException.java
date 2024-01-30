@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class ConstraintViolationException extends RuntimeException {
+public class ScheduleNotFoundBySchoolIdException extends RuntimeException {
 	private String message;
 
 }

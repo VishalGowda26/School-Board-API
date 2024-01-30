@@ -3,12 +3,14 @@ package com.school.sba.exception;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @SuppressWarnings("serial")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class ConstraintViolationException extends RuntimeException {
-	private String message;
+@Setter
+public class AlreadyClassHourAssoatedException extends RuntimeException {
 
+	private String message;
 }
