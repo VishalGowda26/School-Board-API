@@ -18,4 +18,5 @@ public interface UserService {
 	public ResponseEntity<ResponseStructure<UserResponse>> getUser(@PathVariable int userId);
 
 	public ResponseEntity<ResponseStructure<UserResponse>> deleteUser(@PathVariable int userId);
+
 }

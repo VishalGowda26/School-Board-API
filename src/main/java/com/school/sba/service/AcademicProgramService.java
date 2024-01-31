@@ -1,5 +1,7 @@
 package com.school.sba.service;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -21,6 +23,8 @@ public interface AcademicProgramService {
 	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> addUserToAcademicProgram(
 			@PathVariable int programId, @PathVariable int userId);
 
-	public ResponseEntity<ResponseStructure<UserResponse>> fetchUsersList(@PathVariable int programId,
+	public ResponseEntity<ResponseStructure<List<UserResponse>>> fetchUsersList(@PathVariable int programId,
 			@PathVariable UserRole userRole);
+
+	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> deleteProgram(@PathVariable int programId);
 }

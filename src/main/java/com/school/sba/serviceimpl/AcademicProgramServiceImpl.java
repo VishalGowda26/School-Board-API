@@ -17,6 +17,7 @@ import com.school.sba.exception.ConstraintViolationException;
 import com.school.sba.exception.UnauthorizedException;
 import com.school.sba.exception.UserNotFoundByIdException;
 import com.school.sba.repository.AcademicProgramRepo;
+import com.school.sba.repository.ClassHourRepo;
 import com.school.sba.repository.SchoolRepo;
 import com.school.sba.repository.UserRepo;
 import com.school.sba.requestdto.AcademicProgramRequest;
@@ -38,6 +39,9 @@ public class AcademicProgramServiceImpl implements AcademicProgramService {
 	SchoolRepo schoolRepo;
 
 	@Autowired
+	ClassHourRepo hourRepo;
+
+	@Autowired
 	UserServiceImpl userService;
 
 	@Autowired
@@ -47,7 +51,7 @@ public class AcademicProgramServiceImpl implements AcademicProgramService {
 	ResponseStructure<List<AcademicProgramResponse>> responseStructure;
 
 	@Autowired
-	ResponseStructure<UserResponse> userStructure;
+	ResponseStructure<List<UserResponse>> userStructure;
 
 	/*------------------------------> SaveProgram associated to school <--------------------------------------*/
 
@@ -150,22 +154,45 @@ public class AcademicProgramServiceImpl implements AcademicProgramService {
 	/*---------------------> Fetch list of Teachers in Academic Program <----------------------------*/
 
 	@Override
-	public ResponseEntity<ResponseStructure<UserResponse>> fetchUsersList(int programId, UserRole userRole) {
-		User user = programRepo.findByProgramIdAndUserRole(userRole, programId).orElseThrow(
-				() -> new UserNotFoundByIdException("Program With given id/User With given Role Not Found"));
-		if (!(user.getUserrole().equals(UserRole.ADMIN))) {
-			if (user.getUserrole().equals(userRole) && user != null) {
-				programRepo.findAll();
-				userStructure.setData(userService.mapToUserResponse(user));
-				userStructure.setMessage("Teachers List Successfully Fetched");
-				userStructure.setStatus(HttpStatus.FOUND.value());
-			} else {
-				throw new UsernameNotFoundException("User Not Found with Given Id");
-			}
-		} else {
-			throw new UsernameNotFoundException("Admin details are confidential");
-		}
-		return new ResponseEntity<ResponseStructure<UserResponse>>(userStructure, HttpStatus.FOUND);
+	public ResponseEntity<ResponseStructure<List<UserResponse>>> fetchUsersList(int programId, UserRole userRole) {
+		AcademicProgram academicProgram = programRepo.findById(programId)
+				.orElseThrow(() -> new UsernameNotFoundException("Program With given Id not Found"));
+		List<User> roleAndAcademicPrograms = userRepo.findByUserroleAndProgramList(userRole, academicProgram);
+		List<UserResponse> responses = new ArrayList<>();
+		roleAndAcademicPrograms.forEach(userrole -> {
+			responses.add(userService.mapToUserResponse(userrole));
+		});
+		userStructure.setData(responses);
+		userStructure.setMessage("Users with given role Successfully Fetched");
+		userStructure.setStatus(HttpStatus.FOUND.value());
+		return new ResponseEntity<ResponseStructure<List<UserResponse>>>(userStructure, HttpStatus.FOUND);
 	}
 
+	/*------------------------------> Delete Program <--------------------------------------------*/
+
+	@Override
+	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> deleteProgram(int programId) {
+		AcademicProgram program = programRepo.findById(programId)
+				.orElseThrow(() -> new UserNotFoundByIdException("User with Given Id not Found"));
+		if (program != null) {
+			program.setDeleted(true);
+			programRepo.delete(program);
+			structure.setData(mapToAcademicResponseProgram(program));
+			structure.setMessage("Program Successfully Deleted");
+			structure.setStatus(HttpStatus.GONE.value());
+		}
+		return new ResponseEntity<ResponseStructure<AcademicProgramResponse>>(structure, HttpStatus.GONE);
+	}
+
+	/*------------------------------> Delete Program Permanently <--------------------------------------------*/
+
+	public String permanentDeleteProgram() {
+		List<AcademicProgram> program = programRepo.findByIsDeleted(true);
+		program.forEach(p -> {
+			hourRepo.deleteAll(p.getClassHourList());
+			programRepo.delete(p);
+		});
+		return "Program Deleted";
+	}
+	
 }

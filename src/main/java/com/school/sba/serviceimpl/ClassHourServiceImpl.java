@@ -50,6 +50,8 @@ public class ClassHourServiceImpl implements ClassHourService {
 	@Autowired
 	ResponseStructure<List<ClassHourRequest>> lstructure;
 
+	/*-------------------------------------> Create ClassHour <--------------------------------------------*/
+
 	@Override
 	public ResponseEntity<ResponseStructure<ClassHour>> createClassHour(int programId) {
 		return academicProgramRepo.findById(programId).map(academicProgram -> {
@@ -119,6 +121,8 @@ public class ClassHourServiceImpl implements ClassHourService {
 				&& localDateTime.toLocalTime().isBefore(lunchTimeEnd));
 	}
 
+	/*----------------------------------> Update ClassHour <--------------------------------------------*/
+
 	@Override
 	public ResponseEntity<ResponseStructure<List<ClassHourRequest>>> updateClassHour(
 			List<ClassHourRequest> updateRequests) {
@@ -154,4 +158,7 @@ public class ClassHourServiceImpl implements ClassHourService {
 		});
 		return new ResponseEntity<ResponseStructure<List<ClassHourRequest>>>(lstructure, HttpStatus.CREATED);
 	}
+
+	/*--------------------------------------> Delete ClassHour <--------------------------------------------*/
+
 }

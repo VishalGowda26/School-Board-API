@@ -2,6 +2,7 @@ package com.school.sba.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.school.sba.entity.Schedule;
 import com.school.sba.requestdto.ScheduleRequest;
 import com.school.sba.responsedto.ScheduleResponse;
 import com.school.sba.service.ScheduleService;
@@ -38,4 +40,11 @@ public class ScheduleController {
 		return service.updateSchedule(scheduleId, scheduleRequest);
 
 	}
+
+	@DeleteMapping
+	public ResponseEntity<ResponseStructure<ScheduleResponse>> deleteSchedule(@RequestBody Schedule schedule) {
+		return service.deleteSchedule(schedule);
+
+	}
+
 }
