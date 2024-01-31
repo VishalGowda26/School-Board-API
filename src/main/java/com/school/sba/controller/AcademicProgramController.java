@@ -1,7 +1,11 @@
 package com.school.sba.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,12 +37,6 @@ public class AcademicProgramController {
 		return programService.fetchAllAcademicProgram(schoolId);
 	}
 
-//	@PutMapping(path = "/academic-programs/{programId}/users/{userId}")
-//	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> updateProgram(@PathVariable int programId,
-//			@PathVariable int userId) {
-//		return programService.updateProgram(userId, programId);
-//
-//	}
 
 	@PutMapping(path = "/academic-programs/{programId}/users/{userId}")
 	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> addUserToAcademicProgram(
@@ -48,9 +46,17 @@ public class AcademicProgramController {
 	}
 
 	@GetMapping(path = "/academic-programs/{programId}/user-role/{userRole}/users")
-	public ResponseEntity<ResponseStructure<UserResponse>> fetchUsersList(@PathVariable int programId,
+	public ResponseEntity<ResponseStructure<List<UserResponse>>> fetchUsersList(@PathVariable int programId,
 			@PathVariable UserRole userRole) {
 		return programService.fetchUsersList(programId,userRole);
 
 	}
+	
+	@PreAuthorize("hasAuthority('ADMIN')")
+	@DeleteMapping(path = "/academic-programs/{programId}")
+	public ResponseEntity<ResponseStructure<AcademicProgramResponse>> deleteProgram(@PathVariable int programId){
+		return programService.deleteProgram(programId);
+	}
+	
+	
 }

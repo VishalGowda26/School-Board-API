@@ -21,6 +21,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
 public class ClassHour {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -33,7 +33,7 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Autowired
 	UserRepo userRepo;
-	
+
 	@Autowired
 	UserServiceImpl userService;
 
@@ -114,6 +114,8 @@ public class SubjectServiceImpl implements SubjectService {
 		return new ResponseEntity<ResponseStructure<List<Subject>>>(sstructure, HttpStatus.FOUND);
 	}
 
+	/*--------------------------------------> Fetch all Subjects <----------------------------------------*/
+
 	@Override
 	public ResponseEntity<ResponseStructure<List<Subject>>> fetchSubjects() {
 		List<Subject> subjectlist = subjectRepo.findAll();
@@ -122,6 +124,8 @@ public class SubjectServiceImpl implements SubjectService {
 		sstructure.setStatus(HttpStatus.FOUND.value());
 		return new ResponseEntity<ResponseStructure<List<Subject>>>(sstructure, HttpStatus.FOUND);
 	}
+
+	/*-------------------------------> Assign Subjects to Teacher <----------------------------------*/
 
 	@Override
 	public ResponseEntity<ResponseStructure<UserResponse>> assignSubjects(int subjectId, int userId) {

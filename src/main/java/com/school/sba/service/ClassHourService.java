@@ -14,5 +14,7 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 public interface ClassHourService {
 	public ResponseEntity<ResponseStructure<ClassHour>> createClassHour(@PathVariable int programId);
 
-	public ResponseEntity<ResponseStructure<List<ClassHourRequest>>> updateClassHour(@RequestBody List<ClassHourRequest> updateRequests);
+	public ResponseEntity<ResponseStructure<List<ClassHourRequest>>> updateClassHour(
+			@RequestBody List<ClassHourRequest> updateRequests);
+
 }

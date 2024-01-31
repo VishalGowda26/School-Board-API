@@ -107,4 +107,13 @@ public class ScheduleServiceImpl implements ScheduleService {
 		return new ResponseEntity<ResponseStructure<ScheduleResponse>>(structure, HttpStatus.OK);
 	}
 
+	
+	/*------------------------------> Delete Schedule <--------------------------------------------*/
+
+	@Override
+	public ResponseEntity<ResponseStructure<ScheduleResponse>> deleteSchedule(Schedule schedule) {
+		scheduleRepo.delete(schedule);
+		return null;
+	}
+
 }

@@ -65,4 +65,19 @@ public class SchoolServiceImpl implements SchoolService {
 				throw new ConstraintViolationException("Cannot be created Only Admin can Create School");
 		}).orElseThrow(() -> new UserNotFoundByIdException("No details Found"));
 	}
+
+	/*------------------------------> Delete School <--------------------------------------------*/
+	@Override
+	public ResponseEntity<ResponseStructure<SchoolResponse>> deleteSchool(int schoolId) {
+		School school = schoolrepo.findById(schoolId)
+				.orElseThrow(() -> new UserNotFoundByIdException("School Not Found By Id"));
+		if (school != null) {
+			school.setDeleted(true);
+			schoolrepo.delete(school);
+			structure.setData(mapToSchoolResponse(school));
+			structure.setMessage("School Successfully Deleted");
+			structure.setStatus(HttpStatus.GONE.value());
+		}
+		return new ResponseEntity<ResponseStructure<SchoolResponse>>(structure, HttpStatus.GONE);
+	}
 }
