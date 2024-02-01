@@ -1,5 +1,7 @@
 package com.school.sba.serviceimpl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,12 +9,14 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.school.sba.entity.ClassHour;
 import com.school.sba.entity.School;
 import com.school.sba.entity.User;
 import com.school.sba.enums.UserRole;
 import com.school.sba.exception.ConstraintViolationException;
 import com.school.sba.exception.DuplicateEntryException;
 import com.school.sba.exception.UserNotFoundByIdException;
+import com.school.sba.repository.ClassHourRepo;
 import com.school.sba.repository.UserRepo;
 import com.school.sba.requestdto.UserRequest;
 import com.school.sba.responsedto.UserResponse;
@@ -27,10 +31,12 @@ public class UserServiceImpl implements UserService {
 	UserRepo repo;
 	@Autowired
 	ResponseStructure<UserResponse> structure;
+	@Autowired
+	ClassHourRepo hourRepo;
 
 	/*------------------------------> User Request <--------------------------------------------*/
 
-	private User mapToUser(UserRequest userRequest) {
+	public User mapToUser(UserRequest userRequest) {
 		return User.builder().username(userRequest.getUsername())
 				.password(passwordEncoder.encode(userRequest.getPassword())).firstName(userRequest.getFirstName())
 				.lastName(userRequest.getLastName()).contactNo(userRequest.getContactNo()).email(userRequest.getEmail())
@@ -38,7 +44,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	/*------------------------------> User Request <--------------------------------------------*/
-	private UserResponse mapToUserResponse(User user) {
+	public UserResponse mapToUserResponse(User user) {
 		return UserResponse.builder().userId(user.getUserId()).username(user.getUsername())
 				.firstName(user.getFirstName()).lastName(user.getLastName()).email(user.getEmail())
 				.userrole(user.getUserrole()).build();
@@ -96,12 +102,7 @@ public class UserServiceImpl implements UserService {
 	/*------------------------------> TO Delete User <--------------------------------------------*/
 	@Override
 	public ResponseEntity<ResponseStructure<UserResponse>> deleteUser(int userId) {
-		User user = new User();
-		try {
-			user = repo.findById(userId).get();
-		} catch (Exception e) {
-			throw new UserNotFoundByIdException("No details Found");
-		}
+		User user = repo.findById(userId).orElseThrow(() -> new UserNotFoundByIdException("No details Found"));
 		if (user != null) {
 			user.setDeleted(true);
 			repo.delete(user);
@@ -110,6 +111,26 @@ public class UserServiceImpl implements UserService {
 			structure.setData(mapToUserResponse(user));
 		}
 		return new ResponseEntity<ResponseStructure<UserResponse>>(structure, HttpStatus.FOUND);
+	}
+
+	/*------------------------------> Delete User Permanently <--------------------------------------------*/
+
+	public String permanentDeleteUser() {
+		List<User> user = repo.findByIsDeleted(true);
+		user.forEach(users -> {
+			if (!(users.getUserrole().equals(UserRole.ADMIN))) {
+				users.setDeleted(true);
+				users.setProgramList(null);
+				List<ClassHour> hour = hourRepo.findByUser(users);
+				hour.forEach(uhour -> {
+					uhour.setUser(null);
+					hourRepo.save(uhour);
+				});
+				repo.save(users);
+				repo.delete(users);
+			}
+		});
+		return "User Deleted Successfully";
 	}
 
 }

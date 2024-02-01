@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.school.sba.entity.User;
 
+@SuppressWarnings("serial")
 public class CustomUserDetails implements UserDetails {
 
 	private User user;

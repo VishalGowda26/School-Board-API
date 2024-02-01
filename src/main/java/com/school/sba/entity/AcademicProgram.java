@@ -33,8 +33,9 @@ public class AcademicProgram {
 	private String programName;
 	private LocalDate beginsAt;
 	private LocalDate endsAt;
+	private boolean isDeleted = false;
 
-	@ManyToOne
+	@ManyToOne 
 	private School school;
 
 	@ManyToMany

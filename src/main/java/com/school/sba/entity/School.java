@@ -2,6 +2,7 @@ package com.school.sba.entity;
 
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -29,14 +30,12 @@ public class School {
 	private Long contactNo;
 	private String emailId;
 	private String address;
+	private boolean isDeleted = false;
 
-	@OneToOne
+	@OneToOne (cascade = CascadeType.REMOVE)
 	private Schedule schedule;
-
-	@OneToMany
-	private List<User> ulist;
 	
-	@OneToMany
+	@OneToMany (mappedBy = "school")
 	private List<AcademicProgram> academicPrograms;
 
 }

@@ -19,6 +19,7 @@ import com.school.sba.repository.SubjectRepo;
 import com.school.sba.repository.UserRepo;
 import com.school.sba.requestdto.SubjectRequest;
 import com.school.sba.responsedto.AcademicProgramResponse;
+import com.school.sba.responsedto.UserResponse;
 import com.school.sba.service.SubjectService;
 import com.school.sba.util.ResponseStructure;
 
@@ -34,10 +35,13 @@ public class SubjectServiceImpl implements SubjectService {
 	UserRepo userRepo;
 
 	@Autowired
+	UserServiceImpl userService;
+
+	@Autowired
 	ResponseStructure<List<Subject>> sstructure;
 
 	@Autowired
-	ResponseStructure<User> userStructure;
+	ResponseStructure<UserResponse> userStructure;
 
 	@Autowired
 	ResponseStructure<AcademicProgramResponse> structure;
@@ -58,7 +62,6 @@ public class SubjectServiceImpl implements SubjectService {
 					Subject subject2 = new Subject();
 					subject2.setSubjectName(name);
 					subjectRepo.save(subject2);
-					subjects.add(subject2);
 					return subject2;
 				});
 				subjects.add(subject);// add existing subject to subjects list
@@ -111,6 +114,8 @@ public class SubjectServiceImpl implements SubjectService {
 		return new ResponseEntity<ResponseStructure<List<Subject>>>(sstructure, HttpStatus.FOUND);
 	}
 
+	/*--------------------------------------> Fetch all Subjects <----------------------------------------*/
+
 	@Override
 	public ResponseEntity<ResponseStructure<List<Subject>>> fetchSubjects() {
 		List<Subject> subjectlist = subjectRepo.findAll();
@@ -120,21 +125,23 @@ public class SubjectServiceImpl implements SubjectService {
 		return new ResponseEntity<ResponseStructure<List<Subject>>>(sstructure, HttpStatus.FOUND);
 	}
 
+	/*-------------------------------> Assign Subjects to Teacher <----------------------------------*/
+
 	@Override
-	public ResponseEntity<ResponseStructure<User>> assignSubjects(int subjectId, int userId) {
+	public ResponseEntity<ResponseStructure<UserResponse>> assignSubjects(int subjectId, int userId) {
 		Subject subject = subjectRepo.findById(subjectId)
 				.orElseThrow(() -> new UserNotFoundByIdException("Subject Not Found"));
 		User user = userRepo.findById(userId).orElseThrow(() -> new UserNotFoundByIdException("User Not Found"));
 		if (user.getUserrole().equals(UserRole.TEACHER)) {
 			user.setSubject(subject);
 			userRepo.save(user);
-			userStructure.setData(user);
+			userStructure.setData(userService.mapToUserResponse(user));
 			userStructure.setMessage("Subject Successfully added to Teacher");
 			userStructure.setStatus(HttpStatus.CREATED.value());
 		} else {
 			throw new ConstraintViolationException("Subject Can Only Be Associated With User Role TEACHER");
 		}
-		return new ResponseEntity<ResponseStructure<User>>(userStructure, HttpStatus.CREATED);
+		return new ResponseEntity<ResponseStructure<UserResponse>>(userStructure, HttpStatus.CREATED);
 
 	}
 
