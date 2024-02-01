@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -32,6 +31,11 @@ public class ClassHourController {
 	public ResponseEntity<ResponseStructure<List<ClassHourRequest>>> updateClassHour(
 			@RequestBody List<ClassHourRequest> updateRequests) {
 		return classHourService.updateClassHour(updateRequests);
+	}
+
+	@PostMapping(path = "/class-hours/{programId}")
+	public ResponseEntity<ResponseStructure<List<ClassHour>>> createClassHoursForNextweek(@PathVariable int programId) {
+		return classHourService.createClassHoursForNextweek(programId);
 	}
 
 }

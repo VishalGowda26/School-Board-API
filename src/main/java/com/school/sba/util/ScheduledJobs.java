@@ -12,10 +12,14 @@ public class ScheduledJobs {
 	@Autowired
 	AcademicProgramServiceImpl impl;
 
-	@Scheduled(fixedDelay = 1000l)
+//	@Scheduled(fixedDelay = 1000l)
 	public void test() {
-		System.out.println("Test for Scheduled Jobs");
+//		System.out.println("Test for Scheduled Jobs");
 //		System.out.println(impl.isDeleted());
 	}
-
+//	<minute> <hour> <day-of-month> <month> <day-of-week> <command>
+//	@Scheduled(cron = "* * * * MON")
+//	public void generateClasshourEveryMonday() {
+//		
+//	}
 }

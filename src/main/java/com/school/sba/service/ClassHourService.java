@@ -17,4 +17,6 @@ public interface ClassHourService {
 	public ResponseEntity<ResponseStructure<List<ClassHourRequest>>> updateClassHour(
 			@RequestBody List<ClassHourRequest> updateRequests);
 
+	ResponseEntity<ResponseStructure<List<ClassHour>>> createClassHoursForNextweek(int programId);
+
 }

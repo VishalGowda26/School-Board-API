@@ -1,15 +1,22 @@
 package com.school.sba.serviceimpl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.school.sba.entity.AcademicProgram;
+import com.school.sba.entity.ClassHour;
 import com.school.sba.entity.School;
+import com.school.sba.entity.User;
 import com.school.sba.enums.UserRole;
 import com.school.sba.exception.ConstraintViolationException;
 import com.school.sba.exception.UserNotFoundByIdException;
+import com.school.sba.repository.AcademicProgramRepo;
+import com.school.sba.repository.ClassHourRepo;
 import com.school.sba.repository.SchoolRepo;
 import com.school.sba.repository.UserRepo;
 import com.school.sba.requestdto.SchoolRequest;
@@ -25,6 +32,12 @@ public class SchoolServiceImpl implements SchoolService {
 
 	@Autowired
 	UserRepo userRepo;
+
+	@Autowired
+	ClassHourRepo hourRepo;
+
+	@Autowired
+	AcademicProgramRepo programRepo;
 
 	@Autowired
 	ResponseStructure<SchoolResponse> structure;
@@ -79,5 +92,27 @@ public class SchoolServiceImpl implements SchoolService {
 			structure.setStatus(HttpStatus.GONE.value());
 		}
 		return new ResponseEntity<ResponseStructure<SchoolResponse>>(structure, HttpStatus.GONE);
+	}
+
+	/*------------------------------> Permanent Delete School <--------------------------------------------*/
+
+	public String permanentDeleteSchool() {
+		List<School> schools = schoolrepo.findByIsDeleted(true);
+		schools.forEach((school) -> {
+			List<AcademicProgram> programs = school.getAcademicPrograms();
+			programs.forEach((program) -> {
+				List<ClassHour> classHourList = program.getClassHourList();
+				hourRepo.deleteAll(classHourList);
+			});
+			programRepo.deleteAll(programs);
+			List<User> users = userRepo.findBySchool(school);
+			users.forEach((user) -> {
+				if (user.getUserrole().equals(UserRole.ADMIN))
+					users.remove(user);
+			});
+			userRepo.deleteAll(users);
+			schoolrepo.deleteAll(schools);
+		});
+		return "School Deleted";
 	}
 }
